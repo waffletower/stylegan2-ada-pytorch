@@ -95,8 +95,9 @@ def generate_images(
         assert ws.shape[1:] == (G.num_ws, G.w_dim)
         for idx, w in enumerate(ws):
             img = G.synthesis(w.unsqueeze(0), noise_mode=noise_mode)
-            img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
-            img = PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/proj{idx:02d}.png')
+            img = img.permute(0, 2, 3, 1).to(torch.float32)
+            img = img[0].cpu().numpy()
+            img = PIL.Image.fromarray(img[:,:,0], 'F').save(f'{outdir}/proj{idx:02d}.tiff')
         return
 
     if seeds is None:
@@ -117,8 +118,9 @@ def generate_images(
         print('Generating image for seed %d (%d/%d) ...' % (seed, seed_idx, len(seeds)))
         z = torch.from_numpy(np.random.RandomState(seed).randn(1, G.z_dim)).to(device)
         img = G(z, label, truncation_psi=truncation_psi, noise_mode=noise_mode)
-        img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
-        PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/seed{seed:04d}.png')
+        img = img.permute(0, 2, 3, 1).to(torch.float32)
+        img = img[0].cpu().numpy()
+        PIL.Image.fromarray(img[:,:,0], 'F').save(f'{outdir}/seed{seed:04d}.tiff')
 
 
 #----------------------------------------------------------------------------
